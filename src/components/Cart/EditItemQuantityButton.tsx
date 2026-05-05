@@ -1,10 +1,16 @@
 'use client'
 
-import { CartItem } from '@/components/Cart'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 import React, { useMemo } from 'react'
+
+type CartItem = {
+  id?: string | null
+  quantity?: number | null
+  variant?: any
+  product?: any
+}
 
 export function EditItemQuantityButton({ type, item }: { item: CartItem; type: 'minus' | 'plus' }) {
   const { decrementItem, incrementItem, isLoading } = useCart()
@@ -30,6 +36,10 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
       }
     }
 
+    if (type === 'minus' && (item.quantity || 0) <= 1) {
+      return false
+    }
+
     return false
   }, [item, type])
 
@@ -37,13 +47,12 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
     <form>
       <button
         disabled={disabled || isLoading}
-        aria-label={type === 'plus' ? 'Increase item quantity' : 'Reduce item quantity'}
+        aria-label={type === 'plus' ? 'Aumentar cantidad' : 'Reducir cantidad'}
         className={clsx(
-          'ease hover:cursor-pointer flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full px-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80',
-          {
-            'cursor-not-allowed': disabled || isLoading,
-            'ml-auto': type === 'minus',
-          },
+          'flex h-8 w-8 items-center justify-center rounded-full text-neutral-700 transition-all duration-300',
+          disabled || isLoading
+            ? 'cursor-not-allowed opacity-35'
+            : 'hover:bg-white hover:text-neutral-950',
         )}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
@@ -59,9 +68,9 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
         type="button"
       >
         {type === 'plus' ? (
-          <PlusIcon className="h-4 w-4 dark:text-neutral-500 hover:text-blue-300" />
+          <PlusIcon className="h-[15px] w-[15px]" strokeWidth={1.8} />
         ) : (
-          <MinusIcon className="h-4 w-4 dark:text-neutral-500 hover:text-blue-300" />
+          <MinusIcon className="h-[15px] w-[15px]" strokeWidth={1.8} />
         )}
       </button>
     </form>

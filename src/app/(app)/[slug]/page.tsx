@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
@@ -8,12 +7,13 @@ import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import { homeStaticData } from '@/endpoints/seed/home-static'
 import React from 'react'
-
-import type { Page } from '@/payload-types'
+import type { Media, Page, Product } from '@/payload-types'
 import { notFound } from 'next/navigation'
+import { KikuHome } from '@/components/home/KikuHome'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
+
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
@@ -26,12 +26,8 @@ export async function generateStaticParams() {
   })
 
   const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
+    ?.filter((doc) => doc.slug !== 'home')
+    .map(({ slug }) => ({ slug }))
 
   return params
 }
@@ -44,13 +40,9 @@ type Args = {
 
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
-  const url = '/' + slug
 
-  let page = await queryPageBySlug({
-    slug,
-  })
+  let page = await queryPageBySlug({ slug })
 
-  // Remove this code once your website is seeded
   if (!page && slug === 'home') {
     page = homeStaticData() as Page
   }
@@ -59,6 +51,49 @@ export default async function Page({ params }: Args) {
     return notFound()
   }
 
+  // 🔥 HOME PERSONALIZADO
+  if (slug === 'home') {
+    const payload = await getPayload({ config: configPromise })
+
+    const [productsQuery, mediaQuery, categoriesQuery] = await Promise.all([
+      payload.find({
+        collection: 'products',
+        draft: false,
+        limit: 8,
+        overrideAccess: false,
+        pagination: false,
+        sort: '-createdAt',
+        where: {
+          _status: { equals: 'published' },
+        },
+      }),
+      payload.find({
+        collection: 'media',
+        limit: 8,
+        overrideAccess: false,
+        pagination: false,
+        sort: '-createdAt',
+      }),
+      payload.find({
+        collection: 'categories',
+        depth: 1, // 🔥 clave para imágenes
+        limit: 10,
+        overrideAccess: false,
+        pagination: false,
+      }),
+    ])
+
+    return (
+      <KikuHome
+        newArrivals={productsQuery.docs as Product[]}
+        galleryMedia={mediaQuery.docs as Media[]}
+        categories={categoriesQuery.docs}
+        hero={page.hero}
+      />
+    )
+  }
+
+  // 📄 PÁGINAS NORMALES
   const { hero, layout } = page
 
   return (
@@ -71,17 +106,12 @@ export default async function Page({ params }: Args) {
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug = 'home' } = await params
-
-  const page = await queryPageBySlug({
-    slug,
-  })
-
+  const page = await queryPageBySlug({ slug })
   return generateMeta({ doc: page })
 }
 
 const queryPageBySlug = async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
-
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({

@@ -1,11 +1,8 @@
 'use client'
 
 import { FormError } from '@/components/forms/FormError'
-import { FormItem } from '@/components/forms/FormItem'
-import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -20,9 +17,9 @@ type FormData = {
 
 export const CreateAccountForm: React.FC = () => {
   const searchParams = useSearchParams()
-  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()
   const router = useRouter()
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<null | string>(null)
 
@@ -38,100 +35,98 @@ export const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      setLoading(true)
+      setError(null)
+
+      const res = await fetch(${process.env.NEXT_PUBLIC_SERVER_URL}/api/users, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       })
 
-      if (!response.ok) {
-        const message = response.statusText || 'There was an error creating the account.'
-        setError(message)
+      if (!res.ok) {
+        setLoading(false)
+        setError('No se pudo crear la cuenta. Intenta nuevamente.')
         return
       }
 
-      const redirect = searchParams.get('redirect')
-
-      const timer = setTimeout(() => {
-        setLoading(true)
-      }, 1000)
-
       try {
         await login(data)
-        clearTimeout(timer)
-        if (redirect) router.push(redirect)
-        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
-      } catch (_) {
-        clearTimeout(timer)
-        setError('There was an error with the credentials provided. Please try again.')
+        router.push('/account')
+      } catch {
+        setLoading(false)
+        setError('Error al iniciar sesión automáticamente.')
       }
     },
-    [login, router, searchParams],
+    [login, router],
   )
 
   return (
-    <form className="max-w-lg py-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="prose dark:prose-invert mb-6">
-        <p>
-          {`This is where new customers can signup and create a new account. To manage all users, `}
-          <Link href="/admin/collections/users">login to the admin dashboard</Link>.
-        </p>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+
+      {error && <FormError message={error} />}
+
+      {/* EMAIL */}
+      <div>
+        <label className="block text-[10px] uppercase tracking-[0.35em] text-neutral-400 mb-3">
+          Email
+        </label>
+        <Input
+          type="email"
+          {...register('email', { required: 'Campo obligatorio' })}
+          className="h-14 rounded-none border-[#e7e2d9] bg-transparent px-4 text-sm tracking-wide focus:border-black transition-all"
+        />
+        {errors.email && <FormError message={errors.email.message} />}
       </div>
 
-      <Message error={error} />
-
-      <div className="flex flex-col gap-8 mb-8">
-        <FormItem>
-          <Label htmlFor="email" className="mb-2">
-            Email Address
-          </Label>
-          <Input
-            id="email"
-            {...register('email', { required: 'Email is required.' })}
-            type="email"
-          />
-          {errors.email && <FormError message={errors.email.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="password" className="mb-2">
-            New password
-          </Label>
-          <Input
-            id="password"
-            {...register('password', { required: 'Password is required.' })}
-            type="password"
-          />
-          {errors.password && <FormError message={errors.password.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="passwordConfirm" className="mb-2">
-            Confirm Password
-          </Label>
-          <Input
-            id="passwordConfirm"
-            {...register('passwordConfirm', {
-              required: 'Please confirm your password.',
-              validate: (value) => value === password.current || 'The passwords do not match',
-            })}
-            type="password"
-          />
-          {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
-        </FormItem>
+      {/* PASSWORD */}
+      <div>
+        <label className="block text-[10px] uppercase tracking-[0.35em] text-neutral-400 mb-3">
+          Contraseña
+        </label>
+        <Input
+          type="password"
+          {...register('password', { required: 'Campo obligatorio' })}
+          className="h-14 rounded-none border-[#e7e2d9] bg-transparent px-4 text-sm tracking-wide focus:border-black transition-all"
+        />
       </div>
-      <Button disabled={loading} type="submit" variant="default">
-        {loading ? 'Processing' : 'Create Account'}
+
+      {/* CONFIRM */}
+      <div>
+        <label className="block text-[10px] uppercase tracking-[0.35em] text-neutral-400 mb-3">
+          Confirmar contraseña
+        </label>
+        <Input
+          type="password"
+          {...register('passwordConfirm', {
+            required: 'Campo obligatorio',
+            validate: (value) =>
+              value === password.current || 'Las contraseñas no coinciden',
+          })}
+          className="h-14 rounded-none border-[#e7e2d9] bg-transparent px-4 text-sm tracking-wide focus:border-black transition-all"
+        />
+        {errors.passwordConfirm && (
+          <FormError message={errors.passwordConfirm.message} />
+        )}
+      </div>
+
+      {/* CTA */}
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full h-14 bg-black text-white uppercase text-[10px] tracking-[0.4em] hover:bg-neutral-800 transition-all"
+      >
+        {loading ? 'Creando...' : 'Crear cuenta'}
       </Button>
 
-      <div className="prose dark:prose-invert mt-8">
-        <p>
-          {'Already have an account? '}
-          <Link href={`/login${allParams}`}>Login</Link>
-        </p>
+      {/* LOGIN LINK */}
+      <div className="text-center text-[12px] text-neutral-500">
+        ¿Ya tienes cuenta?{' '}
+        <Link href="/login" className="underline underline-offset-4 text-neutral-900">
+          Iniciar sesión
+        </Link>
       </div>
+
     </form>
   )
 }

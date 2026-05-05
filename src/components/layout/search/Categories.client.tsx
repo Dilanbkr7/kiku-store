@@ -1,9 +1,10 @@
 'use client'
+
+import clsx from 'clsx'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useMemo } from 'react'
 
 import { Category } from '@/payload-types'
-import { usePathname, useSearchParams, useRouter } from 'next/navigation'
-import clsx from 'clsx'
 
 type Props = {
   category: Category
@@ -14,9 +15,16 @@ export const CategoryItem: React.FC<Props> = ({ category }) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  const slug =
+    typeof category.slug === 'string' && category.slug.length
+      ? category.slug
+      : String(category.id)
+
+  const activeValue = searchParams.get('category')
+
   const isActive = useMemo(() => {
-    return searchParams.get('category') === String(category.id)
-  }, [category.id, searchParams])
+    return activeValue === slug || activeValue === String(category.id)
+  }, [activeValue, slug, category.id])
 
   const setQuery = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString())
@@ -24,22 +32,35 @@ export const CategoryItem: React.FC<Props> = ({ category }) => {
     if (isActive) {
       params.delete('category')
     } else {
-      params.set('category', String(category.id))
+      params.set('category', slug)
     }
 
-    const newParams = params.toString()
-
-    router.push(pathname + '?' + newParams)
-  }, [category.id, isActive, pathname, router, searchParams])
+    const queryString = params.toString()
+    router.push(queryString ? pathname + '?' + queryString : pathname)
+  }, [isActive, pathname, router, searchParams, slug])
 
   return (
     <button
-      onClick={() => setQuery()}
-      className={clsx('hover:cursor-pointer', {
-        ' underline': isActive,
-      })}
+      type="button"
+      onClick={setQuery}
+      className={clsx(
+        'group flex w-full items-center justify-between rounded-[14px] px-3 py-3 text-left transition-all duration-300',
+        isActive
+          ? 'bg-white text-neutral-950 shadow-[0_8px_24px_rgba(0,0,0,0.04)]'
+          : 'text-neutral-600 hover:bg-white hover:text-neutral-950',
+      )}
+      style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}
     >
-      {category.title}
+      <span className="text-[14px] leading-6 tracking-[-0.01em]">{category.title}</span>
+
+      <span
+        className={clsx(
+          'h-[6px] w-[6px] rounded-full transition-all duration-300',
+          isActive
+            ? 'bg-neutral-900'
+            : 'bg-neutral-300 group-hover:bg-neutral-500',
+        )}
+      />
     </button>
   )
 }

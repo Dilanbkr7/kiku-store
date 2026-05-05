@@ -1,40 +1,43 @@
 import type { SortFilterItem } from '@/lib/constants'
 
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 
-import { FilterItemDropdown } from './FilterItemDropdown'
 import { FilterItem } from './FilterItem'
+import { FilterItemDropdown } from './FilterItemDropdown'
+
 export type ListItem = PathFilterItem | SortFilterItem
 export type PathFilterItem = { path: string; title: string }
 
 function FilterItemList({ list }: { list: ListItem[] }) {
   return (
-    <React.Fragment>
+    <>
       {list.map((item: ListItem, i) => (
         <FilterItem item={item} key={i} />
       ))}
-    </React.Fragment>
+    </>
   )
 }
 
 export function FilterList({ list, title }: { list: ListItem[]; title?: string }) {
   return (
-    <React.Fragment>
-      <nav>
-        {title ? (
-          <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">{title}</h3>
-        ) : null}
-        <ul className="hidden md:block">
-          <Suspense fallback={null}>
-            <FilterItemList list={list} />
-          </Suspense>
-        </ul>
-        <ul className="md:hidden">
-          <Suspense fallback={null}>
-            <FilterItemDropdown list={list} />
-          </Suspense>
-        </ul>
-      </nav>
-    </React.Fragment>
+    <nav>
+      {title ? (
+        <p className="mb-4 text-[10px] uppercase tracking-[0.35em] text-neutral-400">
+          {title}
+        </p>
+      ) : null}
+
+      <ul className="hidden flex-col gap-3 md:flex">
+        <Suspense fallback={null}>
+          <FilterItemList list={list} />
+        </Suspense>
+      </ul>
+
+      <div className="md:hidden">
+        <Suspense fallback={null}>
+          <FilterItemDropdown list={list} />
+        </Suspense>
+      </div>
+    </nav>
   )
 }

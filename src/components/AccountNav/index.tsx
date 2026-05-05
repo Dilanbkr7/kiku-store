@@ -1,70 +1,62 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import clsx from 'clsx'
+import { cn } from '@/utilities/cn'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import React from 'react'
 
-type Props = {
-  className?: string
-}
+const navItems = [
+  { label: 'Configuración de cuenta', href: '/account' },
+  { label: 'Direcciones', href: '/account/addresses' },
+  { label: 'Mis pedidos', href: '/account/orders' },
+]
 
-export const AccountNav: React.FC<Props> = ({ className }) => {
+export const AccountNav: React.FC<{ className?: string }> = ({ className }) => {
   const pathname = usePathname()
 
   return (
-    <div className={clsx(className)}>
-      <ul className="flex flex-col gap-2">
-        <li>
-          <Button asChild variant="link">
-            <Link
-              href="/account"
-              className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-                'text-primary': pathname === '/account',
-              })}
-            >
-              Account settings
-            </Link>
-          </Button>
-        </li>
+    <nav className={cn('flex flex-col gap-10', className)}>
+      <ul className="flex flex-col gap-3">
+        {navItems.map((item) => {
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/account' && pathname.includes(item.href))
 
-        <li>
-          <Button asChild variant="link">
-            <Link
-              href="/account/addresses"
-              className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-                'text-primary': pathname === '/account/addresses',
-              })}
-            >
-              Addresses
-            </Link>
-          </Button>
-        </li>
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'group flex items-center justify-between rounded-[20px] border px-5 py-4 text-[11px] uppercase tracking-[0.34em] transition-all duration-500',
+                  isActive
+                    ? 'border-[#e7e0d5] bg-white text-neutral-950 shadow-[0_12px_30px_rgba(0,0,0,0.04)]'
+                    : 'border-transparent bg-transparent text-neutral-500 hover:border-[#ebe3d7] hover:bg-white/75 hover:text-neutral-900',
+                )}
+              >
+                <span className="leading-relaxed">{item.label}</span>
 
-        <li>
-          <Button
-            asChild
-            variant="link"
-            className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-              'text-primary': pathname === '/orders' || pathname.includes('/orders'),
-            })}
-          >
-            <Link href="/orders">Orders</Link>
-          </Button>
-        </li>
+                <span
+                  className={cn(
+                    'ml-4 h-[7px] w-[7px] rounded-full transition-all duration-500',
+                    isActive
+                      ? 'bg-neutral-900 scale-100'
+                      : 'bg-neutral-300 group-hover:bg-neutral-500 group-hover:scale-110',
+                  )}
+                />
+              </Link>
+            </li>
+          )
+        })}
       </ul>
 
-      <hr className="w-full border-white/5" />
+      <div className="h-px w-full bg-[#e5ddd0]" />
 
-      <Button
-        asChild
-        variant="link"
-        className={clsx('text-primary/50 hover:text-primary hover:no-underline', {
-          'text-primary': pathname === '/logout',
-        })}
+      <Link
+        href="/logout"
+        className="inline-flex w-fit border-b border-neutral-900 pb-1 text-[10px] uppercase tracking-[0.34em] text-neutral-700 transition-opacity duration-300 hover:opacity-60"
       >
-        <Link href="/logout">Log out</Link>
-      </Button>
-    </div>
+        Cerrar sesión
+      </Link>
+    </nav>
   )
 }

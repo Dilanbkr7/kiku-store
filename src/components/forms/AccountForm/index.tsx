@@ -2,23 +2,13 @@
 
 import { FormError } from '@/components/forms/FormError'
 import { FormItem } from '@/components/forms/FormItem'
-import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User } from '@/payload-types'
 import { useAuth } from '@/providers/Auth'
-import { useRouter } from 'next/navigation'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-
-type FormData = {
-  email: string
-  name: User['name']
-  password: string
-  passwordConfirm: string
-}
 
 export const AccountForm: React.FC = () => {
   const { setUser, user } = useAuth()
@@ -30,164 +20,145 @@ export const AccountForm: React.FC = () => {
     register,
     reset,
     watch,
-  } = useForm<FormData>()
+  } = useForm<any>()
 
   const password = useRef({})
   password.current = watch('password', '')
 
-  const router = useRouter()
-
   const onSubmit = useCallback(
-    async (data: FormData) => {
-      if (user) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${user.id}`, {
-          // Make sure to include cookies with fetch
-          body: JSON.stringify(data),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+    async (data: any) => {
+      if (!user) return
+
+      const baseURL = process.env.NEXT_PUBLIC_SERVER_URL || ''
+      const endpoint = baseURL + '/api/users/' + user.id
+
+      const response = await fetch(endpoint, {
+        body: JSON.stringify(data),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'PATCH',
+      })
+
+      if (response.ok) {
+        const json = await response.json()
+        setUser(json.doc)
+
+        toast.success('IDENTIDAD ACTUALIZADA CORRECTAMENTE', {
+          style: {
+            background: '#111',
+            color: '#fff',
+            border: '1px solid #262626',
           },
-          method: 'PATCH',
         })
 
-        if (response.ok) {
-          const json = await response.json()
-          setUser(json.doc)
-          toast.success('Successfully updated account.')
-          setChangePassword(false)
-          reset({
-            name: json.doc.name,
-            email: json.doc.email,
-            password: '',
-            passwordConfirm: '',
-          })
-        } else {
-          toast.error('There was a problem updating your account.')
-        }
+        setChangePassword(false)
+        reset({ name: json.doc.name, email: json.doc.email })
       }
     },
     [user, setUser, reset],
   )
 
   useEffect(() => {
-    if (user === null) {
-      router.push(
-        `/login?error=${encodeURIComponent(
-          'You must be logged in to view this page.',
-        )}&redirect=${encodeURIComponent('/account')}`,
-      )
-    }
-
-    // Once user is loaded, reset form to have default values
     if (user) {
-      reset({
-        name: user.name,
-        email: user.email,
-        password: '',
-        passwordConfirm: '',
-      })
+      reset({ name: user.name, email: user.email })
     }
-  }, [user, router, reset, changePassword])
+  }, [user, reset])
 
   return (
-    <form className="max-w-xl" onSubmit={handleSubmit(onSubmit)}>
-      {!changePassword ? (
-        <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p className="">
-              {'Change your account details below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                click here
-              </Button>
-              {' to change your password.'}
-            </p>
-          </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <div className="flex flex-wrap items-center gap-4 border-b border-[#ece5da] pb-6">
+        <button
+          onClick={() => setChangePassword(false)}
+          type="button"
+          className={`rounded-full border px-5 py-2 text-[10px] uppercase tracking-[0.28em] transition-all duration-300 ${
+            !changePassword
+              ? 'border-neutral-950 bg-neutral-950 text-white'
+              : 'border-[#e5ddd0] bg-transparent text-neutral-600 hover:border-neutral-900 hover:text-neutral-900'
+          }`}
+        >
+          Datos
+        </button>
 
-          <div className="flex flex-col gap-8 mb-8">
+        <button
+          onClick={() => setChangePassword(true)}
+          type="button"
+          className={`rounded-full border px-5 py-2 text-[10px] uppercase tracking-[0.28em] transition-all duration-300 ${
+            changePassword
+              ? 'border-neutral-950 bg-neutral-950 text-white'
+              : 'border-[#e5ddd0] bg-transparent text-neutral-600 hover:border-neutral-900 hover:text-neutral-900'
+          }`}
+        >
+          Contraseña
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        {!changePassword ? (
+          <Fragment>
             <FormItem>
-              <Label htmlFor="email" className="mb-2">
-                Email Address
+              <Label className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Correo electrónico
               </Label>
               <Input
-                id="email"
-                {...register('email', { required: 'Please provide an email.' })}
-                type="email"
+                {...register('email', { required: 'CAMPO OBLIGATORIO' })}
+                className="h-14 rounded-[18px] border-[#e7e1d6] bg-[#fbfaf7] px-5 text-[13px] tracking-[0.04em] text-neutral-900 transition-all duration-300 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0"
               />
-              {errors.email && <FormError message={errors.email.message} />}
+              {errors.email && <FormError message={errors.email.message as string} />}
             </FormItem>
 
             <FormItem>
-              <Label htmlFor="name" className="mb-2">
-                Name
+              <Label className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Nombre
               </Label>
               <Input
-                id="name"
-                {...register('name', { required: 'Please provide a name.' })}
-                type="text"
+                {...register('name', { required: 'CAMPO OBLIGATORIO' })}
+                className="h-14 rounded-[18px] border-[#e7e1d6] bg-[#fbfaf7] px-5 text-[13px] tracking-[0.04em] text-neutral-900 transition-all duration-300 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0"
               />
-              {errors.name && <FormError message={errors.name.message} />}
+              {errors.name && <FormError message={errors.name.message as string} />}
             </FormItem>
-          </div>
-        </Fragment>
-      ) : (
-        <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p>
-              {'Change your password below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                cancel
-              </Button>
-              .
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-8 mb-8">
+          </Fragment>
+        ) : (
+          <Fragment>
             <FormItem>
-              <Label htmlFor="password" className="mb-2">
-                New password
+              <Label className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Nueva contraseña
               </Label>
               <Input
-                id="password"
-                {...register('password', { required: 'Please provide a new password.' })}
                 type="password"
+                {...register('password', { required: 'CAMPO OBLIGATORIO' })}
+                className="h-14 rounded-[18px] border-[#e7e1d6] bg-[#fbfaf7] px-5 text-[13px] tracking-[0.04em] text-neutral-900 transition-all duration-300 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0"
               />
-              {errors.password && <FormError message={errors.password.message} />}
             </FormItem>
 
             <FormItem>
-              <Label htmlFor="passwordConfirm" className="mb-2">
-                Confirm password
+              <Label className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Confirmar contraseña
               </Label>
               <Input
-                id="passwordConfirm"
+                type="password"
                 {...register('passwordConfirm', {
-                  required: 'Please confirm your new password.',
-                  validate: (value) => value === password.current || 'The passwords do not match',
+                  validate: (val: string) =>
+                    val === password.current || 'LAS CLAVES NO COINCIDEN',
                 })}
-                type="password"
+                className="h-14 rounded-[18px] border-[#e7e1d6] bg-[#fbfaf7] px-5 text-[13px] tracking-[0.04em] text-neutral-900 transition-all duration-300 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0"
               />
-              {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
+              {errors.passwordConfirm && (
+                <FormError message={errors.passwordConfirm.message as string} />
+              )}
             </FormItem>
-          </div>
-        </Fragment>
-      )}
-      <Button disabled={isLoading || isSubmitting || !isDirty} type="submit" variant="default">
-        {isLoading || isSubmitting
-          ? 'Processing'
-          : changePassword
-            ? 'Change Password'
-            : 'Update Account'}
-      </Button>
+          </Fragment>
+        )}
+      </div>
+
+      <div className="pt-2">
+        <Button
+          disabled={isLoading || isSubmitting || !isDirty}
+          type="submit"
+          className="h-14 rounded-full bg-neutral-950 px-10 text-[10px] font-bold uppercase tracking-[0.36em] text-white transition-all duration-300 hover:bg-neutral-800 disabled:opacity-30"
+        >
+          {isLoading || isSubmitting ? 'PROCESANDO...' : 'GUARDAR CAMBIOS'}
+        </Button>
+      </div>
     </form>
   )
 }

@@ -7,16 +7,20 @@ interface Props {
   menu: Footer['navItems']
 }
 
-export function FooterMenu({ menu }: Props) {
+export default function FooterMenu({ menu }: Props) {
   if (!menu?.length) return null
 
   return (
     <nav>
-      <ul>
+      <ul className="flex flex-col gap-4 text-[16px] leading-7">
         {menu.map((item) => {
           return (
             <li key={item.id}>
-              <CMSLink appearance="link" {...item.link} />
+              <CMSLink
+                appearance="link"
+                {...item.link}
+                className="transition-opacity hover:opacity-60"
+              />
             </li>
           )
         })}

@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
+
 type Props = {
   product: Product
 }
@@ -45,7 +46,7 @@ export function AddToCart({ product }: Props) {
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
       }).then(() => {
-        toast.success('Item added to cart.')
+        toast.success('Añadido a la bolsa')
       })
     },
     [addItem, product, selectedVariant],
@@ -64,8 +65,11 @@ export function AddToCart({ product }: Props) {
         if (product.enableVariants) {
           return variantID === selectedVariant?.id
         }
+
         return true
       }
+
+      return false
     })
 
     if (existingItem) {
@@ -74,21 +78,15 @@ export function AddToCart({ product }: Props) {
       if (product.enableVariants) {
         return existingQuantity >= (selectedVariant?.inventory || 0)
       }
+
       return existingQuantity >= (product.inventory || 0)
     }
 
     if (product.enableVariants) {
-      if (!selectedVariant) {
-        return true
-      }
-
-      if (selectedVariant.inventory === 0) {
-        return true
-      }
+      if (!selectedVariant) return true
+      if (selectedVariant.inventory === 0) return true
     } else {
-      if (product.inventory === 0) {
-        return true
-      }
+      if (product.inventory === 0) return true
     }
 
     return false
@@ -96,16 +94,20 @@ export function AddToCart({ product }: Props) {
 
   return (
     <Button
-      aria-label="Add to cart"
-      variant={'outline'}
-      className={clsx({
-        'hover:opacity-90': true,
-      })}
+      aria-label="Shop now"
+      variant="outline"
+      className={clsx(
+        'h-12 w-full rounded-full border-0 px-8 text-[10px] uppercase tracking-[0.38em] shadow-[0_10px_25px_rgba(0,0,0,0.22)] transition-all duration-300',
+        disabled || isLoading
+          ? 'cursor-not-allowed bg-neutral-300 text-white'
+          : 'bg-black text-white hover:bg-neutral-900',
+      )}
       disabled={disabled || isLoading}
       onClick={addToCart}
       type="submit"
+      style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}
     >
-      Add To Cart
+      {isLoading ? 'Procesando...' : 'Shop now'}
     </Button>
   )
 }

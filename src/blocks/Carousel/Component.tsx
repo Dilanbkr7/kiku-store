@@ -1,17 +1,17 @@
-import type { Product, CarouselBlock as CarouselBlockProps } from '@/payload-types'
+import type { CarouselBlock as CarouselBlockProps, Product } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { DefaultDocumentIDType, getPayload } from 'payload'
-import React from 'react'
+import { getPayload } from 'payload'
+import { Suspense } from 'react'
 
 import { CarouselClient } from './Component.client'
 
-export const CarouselBlock: React.FC<
-  CarouselBlockProps & {
-    id?: DefaultDocumentIDType
-  }
-> = async (props) => {
-  const { id, categories, limit = 3, populateBy, selectedDocs } = props
+type Props = CarouselBlockProps & {
+  id?: string | number
+}
+
+export async function CarouselBlock(props: Props) {
+  const { categories, limit = 3, populateBy, selectedDocs } = props
 
   let products: Product[] = []
 
@@ -20,8 +20,8 @@ export const CarouselBlock: React.FC<
 
     const flattenedCategories = categories?.length
       ? categories.map((category) => {
-          if (typeof category === 'object') return category.id
-          else return category
+          if (typeof category === 'object' && category?.id) return category.id
+          return category
         })
       : null
 
@@ -40,18 +40,27 @@ export const CarouselBlock: React.FC<
         : {}),
     })
 
-    products = fetchedProducts.docs
-  } else if (selectedDocs?.length) {
-    products = selectedDocs.map((post) => {
-      if (typeof post.value !== 'string') return post.value
-    }) as Product[]
+    products = fetchedProducts.docs as Product[]
+  }
+
+  if (populateBy === 'selection' && selectedDocs?.length) {
+    products = selectedDocs
+      .map((doc) => {
+        if (doc && typeof doc.value !== 'string') return doc.value
+        return null
+      })
+      .filter(Boolean) as Product[]
   }
 
   if (!products?.length) return null
 
   return (
-    <div className=" w-full pb-6 pt-1">
-      <CarouselClient products={products} />
+    <div className="w-full pb-6 pt-1">
+      <Suspense
+        fallback={<div className="h-[300px] w-full animate-pulse rounded-lg bg-neutral-100" />}
+      >
+        <CarouselClient products={products} />
+      </Suspense>
     </div>
   )
 }

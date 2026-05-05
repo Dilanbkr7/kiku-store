@@ -1,31 +1,35 @@
-import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '@/utilities/cn'
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center hover:cursor-pointer gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-0",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 ',
+        default:
+          'rounded-full border border-neutral-950 bg-neutral-950 px-6 py-3 text-[10px] uppercase tracking-[0.34em] text-white hover:bg-white hover:text-neutral-950',
         destructive:
-          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40',
+          'rounded-full border border-red-600 bg-red-600 px-6 py-3 text-[10px] uppercase tracking-[0.34em] text-white hover:bg-white hover:text-red-600',
         outline:
-          'border border-input bg-card shadow-xs hover:bg-accent hover:bg-primary-foreground',
-        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+          'rounded-full border border-neutral-200 bg-white px-6 py-3 text-[10px] uppercase tracking-[0.34em] text-neutral-800 hover:border-neutral-950 hover:text-neutral-950',
+        secondary:
+          'rounded-full border border-neutral-200 bg-[#faf8f3] px-6 py-3 text-[10px] uppercase tracking-[0.34em] text-neutral-700 hover:bg-white hover:text-neutral-950',
         ghost:
-          'text-primary/50 hover:text-primary [&.active]:text-primary py-2 px-4 uppercase font-mono tracking-widest text-xs',
-        link: 'text-primary underline-offset-4 hover:underline',
-        nav: 'text-primary/50 hover:text-primary [&.active]:text-primary p-0 pt-2 pb-6 uppercase font-mono tracking-widest text-xs',
+          'px-0 py-0 text-[10px] uppercase tracking-[0.34em] text-neutral-700 hover:text-neutral-950',
+        link:
+          'px-0 py-0 text-[10px] uppercase tracking-[0.34em] text-neutral-700 underline-offset-4 hover:underline',
+        nav:
+          'px-0 py-0 text-[10px] uppercase tracking-[0.34em] text-neutral-500 hover:text-neutral-950',
       },
       size: {
         clear: '',
-        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
-        icon: 'size-9',
+        default: 'h-11',
+        sm: 'h-9 px-4',
+        lg: 'h-14 px-8',
+        icon: 'h-10 w-10 rounded-full border border-neutral-200 bg-white',
       },
     },
     defaultVariants: {
@@ -46,7 +50,10 @@ function Button({ className, variant, size, asChild = false, ...props }: ButtonP
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        'font-sans not-italic',
+      )}
       {...props}
     />
   )

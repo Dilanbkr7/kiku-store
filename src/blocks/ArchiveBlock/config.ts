@@ -1,11 +1,5 @@
 import type { Block } from 'payload'
-
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+// ... (manten tus imports de lexicalEditor, etc.)
 
 export const Archive: Block = {
   slug: 'archive',
@@ -14,65 +8,43 @@ export const Archive: Block = {
     {
       name: 'introContent',
       type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-          ]
-        },
-      }),
       label: 'Intro Content',
+      // ... (manten tu configuración de editor)
     },
     {
       name: 'populateBy',
       type: 'select',
       defaultValue: 'collection',
       options: [
-        {
-          label: 'Collection',
-          value: 'collection',
-        },
-        {
-          label: 'Individual Selection',
-          value: 'selection',
-        },
+        { label: 'Collection', value: 'collection' },
+        { label: 'Individual Selection', value: 'selection' },
       ],
     },
     {
       name: 'relationTo',
       type: 'select',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-      },
       defaultValue: 'products',
       label: 'Collections To Show',
       options: [
-        {
-          label: 'Products',
-          value: 'products',
-        },
+        { label: 'Products', value: 'products' },
+        { label: 'Categories', value: 'categories' }, // AÑADIDO: Ahora puedes elegir categorías
       ],
     },
     {
       name: 'categories',
       type: 'relationship',
       admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
+        condition: (_, siblingData) => 
+          siblingData.populateBy === 'collection' && 
+          siblingData.relationTo === 'products', // Solo si vas a mostrar productos filtrados
       },
       hasMany: true,
-      label: 'Categories To Show',
+      label: 'Filter Products by Categories',
       relationTo: 'categories',
     },
     {
       name: 'limit',
       type: 'number',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-        step: 1,
-      },
       defaultValue: 10,
       label: 'Limit',
     },
@@ -84,11 +56,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['products'],
+      relationTo: ['products', 'categories'], // AÑADIDO: Puedes seleccionar categorías manualmente
     },
   ],
-  labels: {
-    plural: 'Archives',
-    singular: 'Archive',
-  },
 }

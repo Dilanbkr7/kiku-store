@@ -1,10 +1,18 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
 
-import './index.css'
 import { HeaderClient } from './index.client'
+import './index.css'
 
 export async function Header() {
-  const header = await getCachedGlobal('header', 1)()
+  // ✅ YA NO LLEVA () AL FINAL
+  const headerData = await getCachedGlobal('header', 1)
 
-  return <HeaderClient header={header} />
+  // 🛡️ Seguridad
+  if (!headerData) return null
+
+  return (
+    <header className="site-header">
+      <HeaderClient header={headerData} />
+    </header>
+  )
 }

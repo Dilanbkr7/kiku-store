@@ -12,13 +12,14 @@ export const Footer: GlobalConfig = {
   fields: [
     {
       name: 'navItems',
+      label: 'Footer Navigation',
       type: 'array',
+      maxRows: 8,
       fields: [
         link({
           appearances: false,
         }),
       ],
-      maxRows: 6,
     },
   ],
 }

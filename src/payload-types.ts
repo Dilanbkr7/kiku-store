@@ -255,6 +255,9 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'USD' | null;
+  shippingMethod: 'local' | 'servientrega';
+  shippingCost?: number | null;
+  stripePaymentIntentID?: string | null;
   accessToken?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -309,6 +312,10 @@ export interface Product {
     description?: string | null;
   };
   categories?: (number | Category)[] | null;
+  /**
+   * Selecciona en qué temporadas debe aparecer este producto. Un producto puede pertenecer a varias.
+   */
+  seasons?: ('summer' | 'autumn' | 'winter' | 'spring')[] | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -607,14 +614,20 @@ export interface ArchiveBlock {
     [k: string]: unknown;
   } | null;
   populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'products' | null;
+  relationTo?: ('products' | 'categories') | null;
   categories?: (number | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
-    | {
-        relationTo: 'products';
-        value: number | Product;
-      }[]
+    | (
+        | {
+            relationTo: 'products';
+            value: number | Product;
+          }
+        | {
+            relationTo: 'categories';
+            value: number | Category;
+          }
+      )[]
     | null;
   id?: string | null;
   blockName?: string | null;
@@ -627,6 +640,10 @@ export interface ArchiveBlock {
 export interface Category {
   id: number;
   title: string;
+  /**
+   * Imagen principal para mostrar en la cuadrícula de categorías de la Home.
+   */
+  media?: (number | null) | Media;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1447,6 +1464,7 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  media?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -1717,6 +1735,7 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
+  seasons?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -1780,6 +1799,9 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  shippingMethod?: T;
+  shippingCost?: T;
+  stripePaymentIntentID?: T;
   accessToken?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1875,6 +1897,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: number;
+  logo?: (number | null) | Media;
   navItems?:
     | {
         link: {
@@ -1922,6 +1945,7 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
   navItems?:
     | T
     | {

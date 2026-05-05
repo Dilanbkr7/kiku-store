@@ -1,7 +1,6 @@
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { slugField } from 'payload'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 import {
@@ -18,7 +17,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { DefaultDocumentIDType, Where } from 'payload'
+import { DefaultDocumentIDType, slugField, Where } from 'payload'
 
 export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
   ...defaultCollection,
@@ -52,6 +51,8 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     priceInUSD: true,
     inventory: true,
     meta: true,
+    categories: true,
+    seasons: true,
   },
   fields: [
     { name: 'title', type: 'text', required: true },
@@ -131,7 +132,6 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 },
               ],
             },
-
             {
               name: 'layout',
               type: 'blocks',
@@ -155,7 +155,6 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                   }
                 }
 
-                // ID comes back as undefined during seeding so we need to handle that case
                 return {
                   id: {
                     exists: true,
@@ -183,13 +182,9 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
             MetaImageField({
               relationTo: 'media',
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),
@@ -206,6 +201,35 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       },
       hasMany: true,
       relationTo: 'categories',
+    },
+    {
+      name: 'seasons',
+      label: 'Occasions / Seasons',
+      type: 'select',
+      hasMany: true,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Selecciona en qué temporadas debe aparecer este producto. Un producto puede pertenecer a varias.',
+      },
+      options: [
+        {
+          label: 'SUMMER',
+          value: 'summer',
+        },
+        {
+          label: 'AUTUMN',
+          value: 'autumn',
+        },
+        {
+          label: 'WINTER',
+          value: 'winter',
+        },
+        {
+          label: 'SPRING',
+          value: 'spring',
+        },
+      ],
     },
     slugField(),
   ],

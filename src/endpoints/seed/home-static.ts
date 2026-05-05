@@ -19,7 +19,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
                   format: 0,
                   mode: 'normal',
                   style: '',
-                  text: 'Payload Ecommerce Template',
+                  text: 'KIKU — Minimal Luxury Womenswear',
                   version: 1,
                 },
               ],
@@ -49,7 +49,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
                   fields: {
                     linkType: 'custom',
                     newTab: false,
-                    url: '/admin',
+                    url: '/shop?sort=-createdAt',
                   },
                   format: '',
                   indent: 0,
@@ -61,7 +61,7 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
                   format: 0,
                   mode: 'normal',
                   style: '',
-                  text: ' to make your account and seed content for your website.',
+                  text: ' Discover new arrivals and considered essentials for the modern wardrobe.',
                   version: 1,
                 },
               ],
@@ -81,8 +81,8 @@ export const homeStaticData: () => RequiredDataFromCollectionSlug<'pages'> = () 
     },
     layout: [],
     meta: {
-      description: 'An open-source ecommerce site built with Payload and Next.js.',
-      title: 'Payload Ecommerce Template',
+      description: 'KIKU is a minimal luxury womenswear label, featuring new arrivals, evening pieces, and understated essentials.',
+      title: 'KIKU — Luxury Womenswear',
     },
     title: 'Home',
   }

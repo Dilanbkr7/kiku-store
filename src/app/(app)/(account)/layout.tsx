@@ -1,26 +1,15 @@
+import { RenderParams } from '@/components/RenderParams'
 import type { ReactNode } from 'react'
 
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { RenderParams } from '@/components/RenderParams'
-import { AccountNav } from '@/components/AccountNav'
-
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const headers = await getHeaders()
-  const payload = await getPayload({ config: configPromise })
-  const { user } = await payload.auth({ headers })
-
+export default async function AccountLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
-      <div className="container">
-        <RenderParams className="" />
+    <div className="min-h-screen bg-[#f7f4ee]">
+      <div className="container mx-auto px-6 pt-28 lg:px-10">
+        <RenderParams className="text-neutral-600" />
       </div>
 
-      <div className="container mt-16 pb-8 flex gap-8">
-        {user && <AccountNav className="max-w-62 grow flex-col items-start gap-4 hidden md:flex" />}
-
-        <div className="flex flex-col gap-12 grow">{children}</div>
+      <div className="container mx-auto px-6 pb-24 lg:px-10">
+        <main className="max-w-full overflow-hidden">{children}</main>
       </div>
     </div>
   )

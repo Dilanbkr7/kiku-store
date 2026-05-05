@@ -2,11 +2,11 @@
 
 import { Message } from '@/components/Message'
 import { Button } from '@/components/ui/button'
+import { Address } from '@/payload-types'
+import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
-import React, { useCallback, FormEvent } from 'react'
-import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { Address } from '@/payload-types'
+import React, { FormEvent, useCallback } from 'react'
 
 type Props = {
   customerEmail?: string
@@ -36,7 +36,13 @@ export const CheckoutForm: React.FC<Props> = ({
 
       if (stripe && elements) {
         try {
-          const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+          const baseUrl =
+            process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+
+          const returnUrl =
+            baseUrl +
+            '/checkout/confirm-order' +
+            (customerEmail ? '?email=' + encodeURIComponent(customerEmail) : '')
 
           const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
             confirmParams: {
@@ -77,41 +83,54 @@ export const CheckoutForm: React.FC<Props> = ({
               ) {
                 const accessToken =
                   'accessToken' in confirmResult ? (confirmResult.accessToken as string) : ''
+
                 const queryParams = new URLSearchParams()
 
                 if (customerEmail) {
                   queryParams.set('email', customerEmail)
                 }
+
                 if (accessToken) {
                   queryParams.set('accessToken', accessToken)
                 }
 
                 const queryString = queryParams.toString()
-                const redirectUrl = `/orders/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
+                const redirectUrl =
+                  '/orders/' +
+                  confirmResult.orderID +
+                  (queryString ? '?' + queryString : '')
 
-                // Clear the cart after successful payment
                 clearCart()
-
-                // Redirect to order confirmation page
                 router.push(redirectUrl)
+                return
               }
             } catch (err) {
-              console.log({ err })
               const msg = err instanceof Error ? err.message : 'Something went wrong.'
-              setError(`Error while confirming order: ${msg}`)
+              setError('Error al confirmar tu pedido: ' + msg)
               setIsLoading(false)
+              setProcessingPayment(false)
+              return
             }
           }
+
           if (stripeError?.message) {
             setError(stripeError.message)
             setIsLoading(false)
+            setProcessingPayment(false)
+            return
           }
+
+          setIsLoading(false)
+          setProcessingPayment(false)
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Something went wrong.'
-          setError(`Error while submitting payment: ${msg}`)
+          setError('Error al procesar el pago: ' + msg)
           setIsLoading(false)
           setProcessingPayment(false)
         }
+      } else {
+        setIsLoading(false)
+        setProcessingPayment(false)
       }
     },
     [
@@ -133,12 +152,24 @@ export const CheckoutForm: React.FC<Props> = ({
   )
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && <Message error={error} />}
-      <PaymentElement />
-      <div className="mt-8 flex gap-4">
-        <Button disabled={!stripe || isLoading} type="submit" variant="default">
-          {isLoading ? 'Loading...' : 'Pay now'}
+
+      <div className="rounded-[22px] border border-[#ece5da] bg-[#fbfaf7] p-5">
+        <PaymentElement />
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13px] leading-7 text-neutral-500">
+          Al continuar, tu pago será validado de forma segura.
+        </p>
+
+        <Button
+          disabled={!stripe || isLoading}
+          type="submit"
+          className="h-14 rounded-full bg-neutral-950 px-8 text-[10px] uppercase tracking-[0.38em] text-white transition-all duration-300 hover:bg-neutral-800"
+        >
+          {isLoading ? 'Procesando...' : 'Pagar ahora'}
         </Button>
       </div>
     </form>

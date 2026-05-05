@@ -27,7 +27,7 @@ const collections: CollectionSlug[] = [
   'orders',
 ]
 
-const categories = ['Accessories', 'T-Shirts', 'Hats']
+const categories = ['Dresses', 'Tops', 'Outerwear', 'Evening', 'Minimal Essentials']
 
 const sizeVariantOptions = [
   { label: 'Small', value: 'small' },
@@ -520,8 +520,29 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Shop',
-              url: '/shop',
+              label: 'New In',
+              url: '/shop?sort=-createdAt',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Materials',
+              url: '/materials',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Shop by Occasion',
+              url: '/shop?category=Evening',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'About',
+              url: '/about',
             },
           },
           {

@@ -19,10 +19,10 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
 }) => {
   return {
     meta: {
-      title: 'Hat | Payload Ecommerce Template',
+      title: 'KIKU Wool Beret | KIKU',
       image: metaImage,
       description:
-        'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
+        'A softly structured wool beret designed for modern womenswear. Finished with subtle detailing and crafted for year-round wear.',
     },
     _status: 'published',
     layout: [],
@@ -59,8 +59,8 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
       },
     },
     gallery: [{ image: galleryImage }],
-    title: 'Hat',
-    slug: 'hat',
+    title: 'Wool Beret',
+    slug: 'wool-beret',
     priceInUSDEnabled: true,
     priceInUSD: 2500,
     relatedProducts: relatedProducts,

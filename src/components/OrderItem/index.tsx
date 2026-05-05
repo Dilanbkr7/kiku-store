@@ -1,48 +1,46 @@
 import { OrderStatus } from '@/components/OrderStatus'
 import { Price } from '@/components/Price'
-import { Button } from '@/components/ui/button'
 import { Order } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import Link from 'next/link'
 
-type Props = {
-  order: Order
-}
-
-export const OrderItem: React.FC<Props> = ({ order }) => {
-  const itemsLabel = order.items?.length === 1 ? 'Item' : 'Items'
-
+export const OrderItem: React.FC<{ order: Order }> = ({ order }) => {
   return (
-    <div className="bg-card border rounded-lg px-4 py-2 md:px-6 md:py-4 flex flex-col sm:flex-row gap-12 sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-sm uppercase font-mono tracking-widest text-primary/50 truncate max-w-32 sm:max-w-none">{`#${order.id}`}</h3>
+    <div className="group rounded-[22px] border border-[#e9e1d5] bg-[#fbfaf7] p-6 transition-all duration-500 hover:border-[#ddd3c5] hover:bg-white hover:shadow-[0_18px_50px_rgba(0,0,0,0.045)] md:p-7">
+      <div className="mb-8 flex items-start justify-between gap-6">
+        <div>
+          <span className="mb-3 block text-[10px] uppercase tracking-[0.28em] text-neutral-400">
+            Ref: {String(order.id)}
+          </span>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-6">
-          <p className="text-xl">
-            <time dateTime={order.createdAt}>
-              {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
-            </time>
+          <p className="text-[22px] font-[300] leading-none tracking-[-0.03em] text-neutral-950">
+            {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
           </p>
-
-          {order.status && <OrderStatus status={order.status} />}
         </div>
 
-        <p className="flex gap-2 text-xs text-primary/80">
-          <span>
-            {order.items?.length} {itemsLabel}
-          </span>
-          {order.amount && (
-            <>
-              <span>•</span>
-              <Price as="span" amount={order.amount} currencyCode={order.currency ?? undefined} />
-            </>
-          )}
-        </p>
+        <div className="origin-top-right scale-[0.82] transition-all duration-500 group-hover:scale-[0.86]">
+          <OrderStatus status={order.status} />
+        </div>
       </div>
 
-      <Button variant="outline" asChild className="self-start sm:self-auto">
-        <Link href={`/orders/${order.id}`}>View Order</Link>
-      </Button>
+      <div className="flex items-center justify-between gap-6 border-t border-[#ece5da] pt-6">
+        <div className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">
+          Volumen: {order.items?.length || 0} unidad(es)
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="text-[20px] font-[300] tracking-[-0.03em] text-neutral-950">
+            <Price amount={order.amount} />
+          </div>
+
+          <Link
+            href={`/orders/${order.id}`}
+            className="inline-flex border-b border-neutral-900 pb-1 text-[10px] uppercase tracking-[0.32em] text-neutral-700 transition-opacity duration-300 hover:opacity-60"
+          >
+            Ver
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }

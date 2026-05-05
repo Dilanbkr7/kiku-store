@@ -1,14 +1,13 @@
 'use client'
 
-import type { Media as MediaType, Product } from '@/payload-types'
+import type { Product } from '@/payload-types'
 
-import { Media } from '@/components/Media'
 import { GridTileImage } from '@/components/Grid/tile'
-import { useSearchParams } from 'next/navigation'
-import React, { useEffect } from 'react'
-
+import { Media } from '@/components/Media'
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
+import { useSearchParams } from 'next/navigation'
 import { DefaultDocumentIDType } from 'payload'
+import React, { useEffect } from 'react'
 
 type Props = {
   gallery: NonNullable<Product['gallery']>
@@ -20,9 +19,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
   const [api, setApi] = React.useState<CarouselApi>()
 
   useEffect(() => {
-    if (!api) {
-      return
-    }
+    if (!api) return
   }, [api])
 
   useEffect(() => {
@@ -36,10 +33,13 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
         if (typeof item.variantOption === 'object') {
           variantID = item.variantOption.id
-        } else variantID = item.variantOption
+        } else {
+          variantID = item.variantOption
+        }
 
         return Boolean(values.find((value) => value === String(variantID)))
       })
+
       if (index !== -1) {
         setCurrent(index)
         api.scrollTo(index, true)
@@ -48,32 +48,49 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
   }, [searchParams, api, gallery])
 
   return (
-    <div>
-      <div className="relative w-full overflow-hidden mb-8">
-        <Media
-          resource={gallery[current].image}
-          className="w-full"
-          imgClassName="w-full rounded-lg"
-        />
+    <div className="flex flex-col gap-6">
+      {/* MAIN IMAGE */}
+      <div className="overflow-hidden rounded-[26px] border border-neutral-200 bg-neutral-100">
+        <div className="relative w-full overflow-hidden">
+          <Media
+            resource={gallery[current].image}
+            className="w-full"
+            imgClassName="w-full rounded-[26px] object-cover transition duration-700 ease-out"
+          />
+        </div>
       </div>
 
-      <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
-        <CarouselContent>
-          {gallery.map((item, i) => {
-            if (typeof item.image !== 'object') return null
+      {/* THUMBNAILS */}
+      <div className="border-t border-neutral-200 pt-6">
+        <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
+          <CarouselContent className="-ml-3">
+            {gallery.map((item, i) => {
+              if (typeof item.image !== 'object') return null
 
-            return (
-              <CarouselItem
-                className="basis-1/5"
-                key={`${item.image.id}-${i}`}
-                onClick={() => setCurrent(i)}
-              >
-                <GridTileImage active={i === current} media={item.image} />
-              </CarouselItem>
-            )
-          })}
-        </CarouselContent>
-      </Carousel>
+              return (
+                <CarouselItem
+                  className="basis-1/4 pl-3 sm:basis-1/5"
+                  key={`${item.image.id}-${i}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setCurrent(i)}
+                    className={`group block w-full overflow-hidden rounded-[18px] border transition-all duration-300 ${
+                      i === current
+                        ? 'border-neutral-950 shadow-[0_10px_28px_rgba(0,0,0,0.08)]'
+                        : 'border-neutral-200 hover:border-neutral-400'
+                    }`}
+                  >
+                    <div className="overflow-hidden rounded-[18px] bg-neutral-100">
+                      <GridTileImage active={i === current} media={item.image} />
+                    </div>
+                  </button>
+                </CarouselItem>
+              )
+            })}
+          </CarouselContent>
+        </Carousel>
+      </div>
     </div>
   )
 }

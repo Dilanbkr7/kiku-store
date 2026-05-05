@@ -11,14 +11,22 @@ export const Header: GlobalConfig = {
   },
   fields: [
     {
+      name: 'logo',
+      label: 'Logo',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+    },
+    {
       name: 'navItems',
+      label: 'Navigation Items',
       type: 'array',
+      maxRows: 6,
       fields: [
         link({
           appearances: false,
         }),
       ],
-      maxRows: 6,
     },
   ],
 }

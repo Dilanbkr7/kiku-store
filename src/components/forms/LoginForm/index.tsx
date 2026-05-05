@@ -12,10 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 
-type FormData = {
-  email: string
-  password: string
-}
+type FormData = { email: string; password: string }
 
 export const LoginForm: React.FC = () => {
   const searchParams = useSearchParams()
@@ -25,65 +22,67 @@ export const LoginForm: React.FC = () => {
   const router = useRouter()
   const [error, setError] = React.useState<null | string>(null)
 
-  const {
-    formState: { errors, isLoading },
-    handleSubmit,
-    register,
-  } = useForm<FormData>()
+  const { formState: { errors, isLoading }, handleSubmit, register } = useForm<FormData>()
 
-  const onSubmit = useCallback(
-    async (data: FormData) => {
-      try {
-        await login(data)
-        if (redirect?.current) router.push(redirect.current)
-        else router.push('/account')
-      } catch (_) {
-        setError('There was an error with the credentials provided. Please try again.')
-      }
-    },
-    [login, router],
-  )
+  const onSubmit = useCallback(async (data: FormData) => {
+    try {
+      await login(data)
+      if (redirect?.current) router.push(redirect.current)
+      else router.push('/account')
+    } catch (_) {
+      setError('CREDENCIALES INVÁLIDAS. REVISA TUS DATOS.')
+    }
+  }, [login, router])
 
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
-      <Message className="classes.message" error={error} />
-      <div className="flex flex-col gap-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
+      <Message error={error} className="text-[9px] uppercase tracking-[0.2em] font-bold text-red-500" />
+      
+      <div className="flex flex-col gap-10">
         <FormItem>
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-4 block">
+            CORREO ELECTRÓNICO
+          </Label>
           <Input
             id="email"
             type="email"
-            {...register('email', { required: 'Email is required.' })}
+            {...register('email', { required: 'EL CORREO ES OBLIGATORIO' })}
+            className="bg-neutral-900/50 border-white/5 focus:border-white h-16 rounded-none uppercase text-xs tracking-widest px-6 transition-all"
+            placeholder="EMAIL@KIKU.COM"
           />
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-4 block">
+            CONTRASEÑA
+          </Label>
           <Input
             id="password"
             type="password"
-            {...register('password', { required: 'Please provide a password.' })}
+            {...register('password', { required: 'LA CONTRASEÑA ES OBLIGATORIA' })}
+            className="bg-neutral-900/50 border-white/5 focus:border-white h-16 rounded-none px-6 transition-all"
+            placeholder="••••••••"
           />
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-          <p>
-            Forgot your password?{' '}
-            <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
-          </p>
+        <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-neutral-500 flex justify-between">
+          <Link href={`/recover-password${allParams}`} className="hover:text-white transition-colors underline underline-offset-8">
+            ¿OLVIDASTE TU CONTRASEÑA?
+          </Link>
         </div>
       </div>
 
-      <div className="flex gap-4 justify-between">
-        <Button asChild variant="outline" size="lg">
-          <Link href={`/create-account${allParams}`} className="grow max-w-[50%]">
-            Create an account
-          </Link>
+      <div className="flex flex-col gap-4 pt-6">
+        <Button className="w-full bg-white text-black hover:bg-neutral-200 h-16 rounded-none uppercase text-[11px] font-black tracking-[0.4em]" disabled={isLoading} type="submit">
+          {isLoading ? 'VALIDANDO...' : 'ENTRAR'}
         </Button>
-        <Button className="grow" disabled={isLoading} size="lg" type="submit" variant="default">
-          {isLoading ? 'Processing' : 'Continue'}
+        
+        <Button asChild variant="outline" className="w-full border-white/10 h-16 rounded-none uppercase text-[11px] font-black tracking-[0.4em] hover:bg-white hover:text-black transition-all">
+          <Link href={`/create-account${allParams}`}>
+            CREAR UNA CUENTA
+          </Link>
         </Button>
       </div>
     </form>

@@ -8,3 +8,43 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* KIKÚ admin — solo retoque visual seguro */
+
+:root {
+  --kiku-radius: 16px;
+  --kiku-border: rgba(0, 0, 0, 0.08);
+}
+
+/* Solo dashboard custom */
+.kiku-dashboard-card,
+.kiku-dashboard-hero,
+.kiku-dashboard-link {
+  border-radius: var(--kiku-radius);
+}
+
+/* Suaviza cards nativas sin tocar layout fuerte */
+.card,
+[class*='card'],
+[class*='Card'],
+[class*='collection-list__wrap'],
+[class*='document-info'] {
+  border-radius: var(--kiku-radius) !important;
+  border: 1px solid var(--kiku-border) !important;
+  box-shadow: none !important;
+}
+
+/* Inputs más limpios */
+input,
+textarea,
+select {
+  border-radius: 12px !important;
+}
+
+/* Botones más suaves */
+button,
+.btn,
+[class*='btn'],
+[class*='button'] {
+  border-radius: 999px !important;
+}

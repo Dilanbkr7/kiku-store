@@ -6,10 +6,8 @@ import { createUrl } from '@/utilities/createUrl'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import React from 'react'
 
-import type { ListItem } from '.'
-import type { PathFilterItem as PathFilterItemType } from '.'
+import type { ListItem, PathFilterItem as PathFilterItemType } from '.'
 
 function PathFilterItem({ item }: { item: PathFilterItemType }) {
   const pathname = usePathname()
@@ -21,13 +19,13 @@ function PathFilterItem({ item }: { item: PathFilterItemType }) {
   newParams.delete('q')
 
   return (
-    <li className="mt-2 flex text-black dark:text-white" key={item.title}>
+    <li key={item.title}>
       <DynamicTag
         className={clsx(
-          'w-full text-sm underline-offset-4 hover:underline dark:hover:text-neutral-100',
-          {
-            'underline underline-offset-4': active,
-          },
+          'block w-full border-b border-transparent pb-2 text-[14px] leading-6 text-neutral-600 transition-all duration-300',
+          active
+            ? 'border-neutral-900 text-neutral-950'
+            : 'hover:border-[#d9d2c7] hover:text-neutral-900',
         )}
         href={createUrl(item.path, newParams)}
       >
@@ -40,8 +38,9 @@ function PathFilterItem({ item }: { item: PathFilterItemType }) {
 function SortFilterItem({ item }: { item: SortFilterItemType }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const active = searchParams.get('sort') === item.slug
+  const active = searchParams.get('sort') === item.slug || (!searchParams.get('sort') && item.slug === null)
   const q = searchParams.get('q')
+
   const href = createUrl(
     pathname,
     new URLSearchParams({
@@ -49,14 +48,18 @@ function SortFilterItem({ item }: { item: SortFilterItemType }) {
       ...(item.slug && item.slug.length && { sort: item.slug }),
     }),
   )
+
   const DynamicTag = active ? 'p' : Link
 
   return (
-    <li className="mt-2 flex text-sm text-black dark:text-white" key={item.title}>
+    <li key={item.title}>
       <DynamicTag
-        className={clsx('w-full hover:underline hover:underline-offset-4', {
-          'underline underline-offset-4': active,
-        })}
+        className={clsx(
+          'block w-full border-b border-transparent pb-2 text-[14px] leading-6 text-neutral-600 transition-all duration-300',
+          active
+            ? 'border-neutral-900 text-neutral-950'
+            : 'hover:border-[#d9d2c7] hover:text-neutral-900',
+        )}
         href={href}
         prefetch={!active ? false : undefined}
       >
